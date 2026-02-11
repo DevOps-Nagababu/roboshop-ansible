@@ -4,7 +4,7 @@
   vars:
     sg_id: "sg-04544884d1d17d01a"
     ami_id: "ami-0220d79f3f480ecf5"
-    environment: dev
+    env: dev
     instance:
       - mongodb
       - catalogue
@@ -18,10 +18,10 @@
         tags:
           Project: roboshop
           Component: "{{ item }}"
-          environment: "{{ environment}}"
+          Environment: "{{ environment}}"
           Name: "{{ item }}-{{ environment }}"
-        loop: "{{ instance }}"
-        register: ec2_output
+      loop: "{{ instance }}"
+      register: ec2_output
 
     - name: print output for ec2 instance
       ansible.builtin.debug:
