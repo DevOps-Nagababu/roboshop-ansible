@@ -1,0 +1,7 @@
+- name: Creating AWS ec2 instance and r53
+  hosts: local
+  connection: local
+  tasks:
+    - name:
+      ansbile.builtin.debug:
+        msg: "Hello"
