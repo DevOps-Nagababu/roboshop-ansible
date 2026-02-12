@@ -8,7 +8,7 @@
     ami_id: "ami-0220d79f3f480ecf5"
     env: dev
     domain_name: nagababu.online
-    instance:
+    instances:
       - mongodb
       - catalogue
   tasks:
