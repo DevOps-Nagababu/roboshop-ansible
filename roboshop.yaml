@@ -2,7 +2,7 @@
 
 - name: Creating AWS ec2 instance and r53
   hosts: all
-  connection: local
+  # connection: local
   vars:
     sg_id: "sg-04544884d1d17d01a"
     ami_id: "ami-0220d79f3f480ecf5"
