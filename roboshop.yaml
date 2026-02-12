@@ -7,6 +7,7 @@
     sg_id: "sg-04544884d1d17d01a"
     ami_id: "ami-0220d79f3f480ecf5"
     env: dev
+    action: create
     domain_name: nagababu.online
     instances:
       - mongodb
@@ -25,6 +26,7 @@
           Name: "{{ item }}-{{ env }}"
       loop: "{{ instances }}"
       register: ec2_output
+      when: action == "create"
 
     - name: print output for ec2 instance
       ansible.builtin.debug:
@@ -39,6 +41,7 @@
         value: "{{ item.instances[0].private_ip_address}}"
         wait: true
       loop: "{{ ec2_output.results }}"
+      when: action == "create"
 
     - name: Create route53 records
       amazon.aws.route53:
@@ -50,4 +53,36 @@
         value: "{{ item.instances[0].public_ip_address}}"
         wait: true
       loop: "{{ ec2_output.results }}"
-      when: item.item == "frontend"
+      when:
+        - item.item == "frontend"
+        - action == "create"
+      ### DESTROY ###
+    - name: delete r53 records for frontend
+      amazon.aws.route53:
+        state: absent
+        zone: "{{ domain_name }}"
+        record: "roboshop-{{ env }}.{{ domain_name }}" # roboshop-dev.daws88s.online
+        type: A
+        ttl: 1
+      loop: "{{ instances }}"
+      when: # and
+        - item == "frontend"
+        - action == "destroy"
+
+    - name: delete r53 records
+      amazon.aws.route53:
+        state: absent
+        zone: "{{ domain_name }}"
+        record: "{{ item }}-{{ env }}.{{ domain_name }}" # roboshop-dev.daws88s.online
+        type: A
+        ttl: 1
+      loop: "{{ instances }}"
+      when: action == "destroy"
+
+    - name: delete ec2 instance
+      amazon.aws.ec2_instance:
+        state: absent
+        name: "{{ item }}-{{ env }}"
+        wait: false
+      loop: "{{ instances }}"
+      when: action == "destroy"
