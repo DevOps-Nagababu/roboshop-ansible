@@ -5,6 +5,7 @@
     sg_id: "sg-04544884d1d17d01a"
     ami_id: "ami-0220d79f3f480ecf5"
     env: dev
+    domain_name: nagababu.online
     instance:
       - mongodb
       - catalogue
@@ -26,3 +27,12 @@
     - name: print output for ec2 instance
       ansible.builtin.debug:
         msg: "{{ ec2_output }}"
+    - name: Create route53 records
+      amazon.aws.route53:
+        state: present
+        zone: "{{domain_name }}"
+        record: "{{ item.item }}"
+        type: A
+        ttl: 1
+        value: "{{ item.results.instances[0].private_ip_address}}"
+        wait: true
