@@ -1,4 +1,4 @@
-# ansible-playbook -i inventory -e ansible_user=ec2-user -e ansible_password=DevOps321 \ -e'{"instances":["redis","user","cart","mysql","shipping","rabbitmq","payment","frontend"]}' \ roboshop.yaml
+# ansible-playbook -i localhost, -e ansible_user=ec2-user -e ansible_password=DevOps321 -e '{"instances":["redis","user","cart","mysql","shipping","rabbitmq","payment","frontend"]}' roboshop.yaml
 
 - name: Creating AWS ec2 instance and r53
   hosts: all
