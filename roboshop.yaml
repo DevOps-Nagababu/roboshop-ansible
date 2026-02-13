@@ -1,4 +1,9 @@
-# ansible-playbook -i localhost, -e ansible_user=ec2-user -e ansible_password=DevOps321 -e '{"instances":["redis","user","cart","mysql","shipping","rabbitmq","payment","frontend"]}' roboshop.yaml
+Creating the ec2-instance and route53 records
+# ansible-playbook -i localhost, -e '{"instances":["redis","user","cart","mysql","shipping","rabbitmq","payment","frontend","catalogue","mongodb"]}' roboshop.yaml
+
+# Delete the ec2-instance and route53 records
+# ansible-playbook -i localhost, -e action=destroy -e '{"instances":["redis","user","cart","mysql","shipping","rabbitmq","payment","frontend","catalogue","mongodb"]}' roboshop.yaml
+
 
 - name: Creating AWS ec2 instance and r53
   hosts: all
@@ -31,6 +36,7 @@
     - name: print output for ec2 instance
       ansible.builtin.debug:
         msg: "{{ ec2_output }}"
+      when: action == "create"
 
     - name: Create route53 records
       amazon.aws.route53:
