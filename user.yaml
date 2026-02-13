@@ -53,27 +53,6 @@
         src: user.service
         dest: /etc/systemd/system/user.service
 
-    - name: copy mongo repo
-      ansible.builtin.copy:
-        src: mongo.repo
-        dest: /etc/yum.repos.d/mongo.repo
-
-    - name: Install Mongodb client
-      ansible.builtin.dnf:
-        name: mongodb-mongosh
-        state: present
-    - name: Check Mongodb data loaded or not
-      ansible.builtin.command: mongosh --host "{{ MONGODB_HOST }}" --quiet  --eval 'db.getMongo().getDBNames().indexOf("user")'
-      register: user_outpu
-
-    - name: Print the user output
-      ansible.builtin.debug:
-        msg: "{{ user_outpu }}"
-
-    - name: Load the products
-      ansible.builtin.shell: mongosh --host "{{ MONGODB_HOST }}" </app/db/master-data.js
-      when: user_outpu.stdout | int < 0
-
     - name: Start user
       ansible.builtin.service:
         name: user
