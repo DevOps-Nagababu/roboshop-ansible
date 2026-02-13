@@ -1,9 +1,7 @@
-Creating the ec2-instance and route53 records
 # ansible-playbook -i localhost, -e '{"instances":["redis","user","cart","mysql","shipping","rabbitmq","payment","frontend","catalogue","mongodb"]}' roboshop.yaml
 
 # Delete the ec2-instance and route53 records
 # ansible-playbook -i localhost, -e action=destroy -e '{"instances":["redis","user","cart","mysql","shipping","rabbitmq","payment","frontend","catalogue","mongodb"]}' roboshop.yaml
-
 
 - name: Creating AWS ec2 instance and r53
   hosts: all

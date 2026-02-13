@@ -1,0 +1,81 @@
+- name: user Configuration
+  hosts: user
+  become: yes
+  tasks:
+    - name: Disableing nodejs default module
+      ansible.builtin.command: dnf module enable nodejs:20 -y
+
+    - name: Installing nodejs
+      ansible.builtin.dnf:
+        name: nodejs
+        state: present
+
+    - name: Create system user
+      ansible.builtin.user:
+        name: roboshop
+        system: true
+        home: /app
+        shell: /sbin/nologin
+        comment: "Roboshop system user"
+
+    - name: Delete the app directory
+      ansible.builtin.file:
+        path: /app
+        state: absent
+
+    - name: Create the app directory
+      ansible.builtin.file:
+        path: /app
+        state: directory
+
+    - name: Delete the Download code
+      ansible.builtin.file:
+        path: /tmp/user.zip
+        state: absent
+
+    - name: Download user
+      ansible.builtin.get_url:
+        url: https://roboshop-artifacts.s3.amazonaws.com/user-v3.zip
+        dest: /tmp/user.zip
+
+    - name: Unzip user
+      ansible.builtin.unarchive:
+        src: /tmp/user.zip
+        dest: /app
+        remote_src: yes
+
+    - name: Install nodejs dependencies
+      community.general.npm:
+        path: /app
+
+    - name: copy user service file
+      ansible.builtin.copy:
+        src: user.service
+        dest: /etc/systemd/system/user.service
+
+    - name: copy mongo repo
+      ansible.builtin.copy:
+        src: mongo.repo
+        dest: /etc/yum.repos.d/mongo.repo
+
+    - name: Install Mongodb client
+      ansible.builtin.dnf:
+        name: mongodb-mongosh
+        state: present
+    - name: Check Mongodb data loaded or not
+      ansible.builtin.command: mongosh --host "{{ MONGODB_HOST }}" --quiet  --eval 'db.getMongo().getDBNames().indexOf("user")'
+      register: user_outpu
+
+    - name: Print the user output
+      ansible.builtin.debug:
+        msg: "{{ user_outpu }}"
+
+    - name: Load the products
+      ansible.builtin.shell: mongosh --host "{{ MONGODB_HOST }}" </app/db/master-data.js
+      when: user_outpu.stdout | int < 0
+
+    - name: Start user
+      ansible.builtin.service:
+        name: user
+        state: restarted
+        enabled: yes
