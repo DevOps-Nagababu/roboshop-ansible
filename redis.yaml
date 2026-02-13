@@ -2,8 +2,8 @@
   hosts: redis
   become: yes
   tasks:
-    - name: Disableing redis default module
-      ansible.builtin.command: dnf module disable redis -y
+    # - name: Disableing redis default module
+    #   ansible.builtin.command: dnf module disable redis -y
 
     - name: Enable redis version 7
       ansible.builtin.command: dnf module enable redis:7 -y
