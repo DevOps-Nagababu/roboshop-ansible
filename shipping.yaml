@@ -1,0 +1,83 @@
+- name: Configuration Shipping module
+  hosts: shipping
+  become: yes
+  tasks:
+    - name: Installing Maven mysql client
+      ansible.builtin.dnf:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - maven
+        - mysql
+
+    - name: Create system user
+      ansible.builtin.user:
+        name: roboshop
+        system: true
+        home: /app
+        shell: /sbin/nologin
+        comment: "Roboshop system user"
+
+    - name: Delete the app directory
+      ansible.builtin.file:
+        path: /app
+        state: absent
+
+    - name: Create the app directory
+      ansible.builtin.file:
+        path: /app
+        state: directory
+
+    - name: Delete the Download code
+      ansible.builtin.file:
+        path: /tmp/shipping.zip
+        state: absent
+
+    - name: Download shipping
+      ansible.builtin.get_url:
+        url: https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip
+        dest: /tmp/shipping.zip
+
+    - name: Unzip shipping
+      ansible.builtin.unarchive:
+        src: /tmp/shipping.zip
+        dest: /app
+        remote_src: yes
+
+    - name: Install maven dependencies
+      ansible.builtin.command: mvn clean package
+      args:
+        chdir: /app
+
+    - name: Crating the target folder
+      ansible.builtin.command: mv target/shipping-1.0.jar shipping.jar
+      args:
+        chdir: /app
+
+    - name: Create Shipping service file
+      ansible.builtin.template:
+        src: shipping.service
+        dest: /etc/systemd/system/shipping.service
+
+    - name: Daemon reload
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+
+    - name: Import shipping data
+      community.mysql.mysql_db:
+        state: import
+        name: all
+        login_host: "{{ MYSQL_HOST }}"
+        login_user: root
+        login_password: Roboshop@1
+        target: "{{ item }}"
+      loop:
+        - /app/db/schema.sql
+        - /app/db/app-user.sql
+        - /app/db/master-data.sql
+
+    - name: Start Catalogue
+      ansible.builtin.service:
+        name: catalogue
+        state: restarted
+        enabled: yes
