@@ -37,7 +37,7 @@
         path: /etc/nginx/nginx.conf
 
     - name: copy nginx conf file
-      ansible.builtin.copy:
+      ansible.builtin.template:
         src: nginx.conf
         dest: /etc/nginx/nginx.conf
 
@@ -45,4 +45,4 @@
       ansible.builtin.service:
         name: nginx
         state: restarted
-        enable: yes
+        enabled: yes
