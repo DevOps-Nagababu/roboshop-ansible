@@ -60,7 +60,7 @@
         dest: /etc/systemd/system/shipping.service
 
     - name: Install python dependencies
-      community.general.pip:
+      ansible.builtin.pip:
         name: PyMySQL
         executable: pip3.9
 

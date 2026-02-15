@@ -41,7 +41,7 @@
         remote_src: yes
 
     - name: Install python dependencies
-      community.general.pip:
+      ansible.builtin.pip:
       requirements: requirements.txt
       executable: pip3.9
       args:
