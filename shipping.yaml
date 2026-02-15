@@ -58,11 +58,11 @@
       ansible.builtin.template:
         src: shipping.service
         dest: /etc/systemd/system/shipping.service
-    
+
     - name: Install python dependencies
       community.general.pip:
-      name: PyMySQL
-      executable: pip3.9
+        name: PyMySQL
+        executable: pip3.9
 
     - name: Daemon reload
       ansible.builtin.systemd_service:
